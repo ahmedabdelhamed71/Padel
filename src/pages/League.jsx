@@ -10,17 +10,20 @@ import GenerateLeagueMatchesModal from "../components/GenerateLeagueMatchesModal
 import {
   buildLeagueStandings,
   formatMatchDate,
-  generateLeagueTeamRoundRobin
+  generateLeagueTeamRoundRobin,
+  serializeLeagueStandings
 } from "../utils";
 
 export default function League({
   players,
   teams,
   matches,
+  carriedStandings,
   scoring,
   onPlayersChange,
   onTeamsChange,
-  onMatchesChange
+  onMatchesChange,
+  onCarriedStandingsChange
 }) {
   const [tab, setTab] = useState("fixtures");
   const [playerOpen, setPlayerOpen] = useState(false);
@@ -31,8 +34,8 @@ export default function League({
   const [generateOpen, setGenerateOpen] = useState(false);
 
   const rows = useMemo(
-    () => buildLeagueStandings(players, teams, matches, scoring),
-    [players, teams, matches, scoring]
+    () => buildLeagueStandings(players, teams, matches, scoring, carriedStandings),
+    [players, teams, matches, scoring, carriedStandings]
   );
 
   const playerName = (id) =>
@@ -169,6 +172,10 @@ export default function League({
     onMatchesChange(nextMatches);
   };
 
+  const keepCurrentStandings = () => {
+    onCarriedStandingsChange(serializeLeagueStandings(rows));
+  };
+
   return (
     <div className="page">
       <div className="page-heading page-heading-split">
@@ -299,16 +306,31 @@ export default function League({
             </div>
 
             {matches.length > 0 && (
-              <button
-                type="button"
-                className="button danger-outline small"
-                onClick={() => {
-                  if (!window.confirm("Delete all League matches? This will remove played and upcoming matches and clear the League standings points.")) return;
-                  onMatchesChange([]);
-                }}
-              >
-                Clear all matches
-              </button>
+              <div className="fixture-list-actions">
+                <button
+                  type="button"
+                  className="button danger-outline small"
+                  disabled={!matches.some((match) => match.status === "played")}
+                  onClick={() => {
+                    if (!window.confirm("Delete all played League matches? Upcoming matches and the current League standings points will be kept.")) return;
+                    keepCurrentStandings();
+                    onMatchesChange(matches.filter((match) => match.status !== "played"));
+                  }}
+                >
+                  Delete played matches
+                </button>
+                <button
+                  type="button"
+                  className="button danger-outline small"
+                  onClick={() => {
+                    if (!window.confirm("Delete all League matches? The match list will be cleared, but the current League standings points will be kept.")) return;
+                    keepCurrentStandings();
+                    onMatchesChange([]);
+                  }}
+                >
+                  Clear all matches
+                </button>
+              </div>
             )}
           </div>
 
@@ -437,6 +459,7 @@ export default function League({
               onClick={() => {
                 if (!window.confirm("Reset League standings points and stats? Match history will be kept.")) return;
 
+                onCarriedStandingsChange([]);
                 onMatchesChange(
                   matches.map((match) =>
                     match.status === "played"

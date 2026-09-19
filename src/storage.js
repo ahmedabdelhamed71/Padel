@@ -39,6 +39,7 @@ export function saveStorage(key, value, storage) {
 export const LEAGUE_PLAYERS_KEY = "mp-league-players-v2";
 export const LEAGUE_TEAMS_KEY = "mp-league-teams-v1";
 export const LEAGUE_MATCHES_KEY = "mp-league-matches-v2";
+export const LEAGUE_STANDINGS_KEY = "mp-league-standings-v1";
 
 export function loadLeaguePlayers(storage) {
   return normalizePlayers(readStorage(LEAGUE_PLAYERS_KEY, [], storage), []);
@@ -94,6 +95,27 @@ export function loadLeagueMatches(teams, storage) {
     if (!currentTeamsExist && !historicalSnapshotsExist) return false;
 
     seen.add(match.id);
+    return true;
+  });
+}
+
+export function loadLeagueStandings(players, storage) {
+  const value = readStorage(LEAGUE_STANDINGS_KEY, [], storage);
+  if (!Array.isArray(value)) return [];
+
+  const playerIds = new Set(players.map((player) => String(player.id)));
+  const seen = new Set();
+
+  return value.filter((row) => {
+    if (!row || typeof row !== "object") return false;
+    const playerId = String(row.playerId);
+    const validStats = [row.played, row.wins, row.losses, row.points]
+      .every((value) => Number.isSafeInteger(value) && value >= 0);
+
+    if (!playerIds.has(playerId) || seen.has(playerId) || !validStats) return false;
+    if (!Array.isArray(row.form) || !row.form.every((result) => result === "W" || result === "L")) return false;
+
+    seen.add(playerId);
     return true;
   });
 }

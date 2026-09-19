@@ -11,7 +11,7 @@ import SearchResults from "./pages/SearchResults";
 import { searchClub } from "./search";
 import { leagueFixtures, players as starterPlayers, starterFriendlyMatches } from "./data";
 import { buildFriendlyStandings } from "./utils";
-import { loadPlayers, loadMatches, loadScoring, loadLeaguePlayers, loadLeagueTeams, loadLeagueMatches, saveStorage, PLAYERS_KEY, MATCHES_KEY, SCORING_KEY, LEAGUE_PLAYERS_KEY, LEAGUE_TEAMS_KEY, LEAGUE_MATCHES_KEY } from "./storage";
+import { loadPlayers, loadMatches, loadScoring, loadLeaguePlayers, loadLeagueTeams, loadLeagueMatches, loadLeagueStandings, saveStorage, PLAYERS_KEY, MATCHES_KEY, SCORING_KEY, LEAGUE_PLAYERS_KEY, LEAGUE_TEAMS_KEY, LEAGUE_MATCHES_KEY, LEAGUE_STANDINGS_KEY } from "./storage";
 
 export default function App() {
   const [page, setPage] = useState("overview");
@@ -40,6 +40,9 @@ export default function App() {
   const [leagueMatches, setLeagueMatches] = useState(() =>
     loadLeagueMatches(loadLeagueTeams(loadLeaguePlayers()))
   );
+  const [leagueStandings, setLeagueStandings] = useState(() =>
+    loadLeagueStandings(loadLeaguePlayers())
+  );
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -57,15 +60,17 @@ export default function App() {
     const leaguePlayersSaved = saveStorage(LEAGUE_PLAYERS_KEY, leaguePlayers);
     const leagueTeamsSaved = saveStorage(LEAGUE_TEAMS_KEY, leagueTeams);
     const leagueMatchesSaved = saveStorage(LEAGUE_MATCHES_KEY, leagueMatches);
+    const leagueStandingsSaved = saveStorage(LEAGUE_STANDINGS_KEY, leagueStandings);
     setStorageFailed(
       !playersSaved ||
       !matchesSaved ||
       !scoringSaved ||
       !leaguePlayersSaved ||
       !leagueTeamsSaved ||
-      !leagueMatchesSaved
+      !leagueMatchesSaved ||
+      !leagueStandingsSaved
     );
-  }, [players, matches, scoring, leaguePlayers, leagueTeams, leagueMatches]);
+  }, [players, matches, scoring, leaguePlayers, leagueTeams, leagueMatches, leagueStandings]);
 
   const standings = useMemo(
     () => buildFriendlyStandings(players, matches, scoring),
@@ -119,10 +124,12 @@ export default function App() {
         players={leaguePlayers}
         teams={leagueTeams}
         matches={leagueMatches}
+        carriedStandings={leagueStandings}
         scoring={scoring}
         onPlayersChange={setLeaguePlayers}
         onTeamsChange={setLeagueTeams}
         onMatchesChange={setLeagueMatches}
+        onCarriedStandingsChange={setLeagueStandings}
       />
     );
   } else {

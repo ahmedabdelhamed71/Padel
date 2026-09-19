@@ -1485,6 +1485,24 @@ select:focus {
   flex-wrap: wrap;
 }
 
+.fixture-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 650px) {
+  .fixture-list-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .fixture-list-actions .button {
+    flex: 1 1 180px;
+  }
+}
+
 
 /* Dark mode uses the same layout and components; only theme colors change. */
 :root[data-theme="dark"] {

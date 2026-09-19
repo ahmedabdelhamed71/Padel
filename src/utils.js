@@ -216,12 +216,28 @@ export function generateLeagueTeamRoundRobin(teams, format = "single") {
   return [...firstLeg, ...secondLeg];
 }
 
-export function buildLeagueStandings(players, teams, matches, scoring = DEFAULT_SCORING) {
+export function buildLeagueStandings(
+  players,
+  teams,
+  matches,
+  scoring = DEFAULT_SCORING,
+  carriedStandings = []
+) {
   const points = normalizeScoring(scoring);
+  const carriedByPlayerId = new Map(
+    carriedStandings.map((row) => [String(row.playerId), row])
+  );
   const table = new Map(
     players.map((player) => [
       player.id,
-      { ...player, played: 0, wins: 0, losses: 0, points: 0, form: [] }
+      {
+        ...player,
+        played: carriedByPlayerId.get(String(player.id))?.played ?? 0,
+        wins: carriedByPlayerId.get(String(player.id))?.wins ?? 0,
+        losses: carriedByPlayerId.get(String(player.id))?.losses ?? 0,
+        points: carriedByPlayerId.get(String(player.id))?.points ?? 0,
+        form: [...(carriedByPlayerId.get(String(player.id))?.form ?? [])]
+      }
     ])
   );
 
@@ -287,4 +303,15 @@ export function buildLeagueStandings(players, teams, matches, scoring = DEFAULT_
       a.losses - b.losses ||
       a.name.localeCompare(b.name)
   );
+}
+
+export function serializeLeagueStandings(rows) {
+  return rows.map((row) => ({
+    playerId: row.id,
+    played: row.played,
+    wins: row.wins,
+    losses: row.losses,
+    points: row.points,
+    form: row.form.slice(-5)
+  }));
 }
