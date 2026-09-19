@@ -236,6 +236,7 @@ export function buildLeagueStandings(
         wins: carriedByPlayerId.get(String(player.id))?.wins ?? 0,
         losses: carriedByPlayerId.get(String(player.id))?.losses ?? 0,
         points: carriedByPlayerId.get(String(player.id))?.points ?? 0,
+        goalDifference: carriedByPlayerId.get(String(player.id))?.goalDifference ?? 0,
         form: [...(carriedByPlayerId.get(String(player.id))?.form ?? [])]
       }
     ])
@@ -271,6 +272,7 @@ export function buildLeagueStandings(
 
     const winners = match.scoreA > match.scoreB ? teamAPlayerIds : teamBPlayerIds;
     const losers = match.scoreA > match.scoreB ? teamBPlayerIds : teamAPlayerIds;
+    const scoreDifference = Math.abs(match.scoreA - match.scoreB);
 
     for (const playerId of [...teamAPlayerIds, ...teamBPlayerIds]) {
       const row = table.get(playerId);
@@ -284,6 +286,7 @@ export function buildLeagueStandings(
       if (!row) continue;
       row.wins += 1;
       row.points += points.win;
+      row.goalDifference += scoreDifference;
       row.form.push("W");
     }
 
@@ -292,6 +295,7 @@ export function buildLeagueStandings(
       if (!row) continue;
       row.losses += 1;
       row.points += points.loss;
+      row.goalDifference -= scoreDifference;
       row.form.push("L");
     }
   }
@@ -299,6 +303,7 @@ export function buildLeagueStandings(
   return [...table.values()].sort(
     (a, b) =>
       b.points - a.points ||
+      b.goalDifference - a.goalDifference ||
       b.wins - a.wins ||
       a.losses - b.losses ||
       a.name.localeCompare(b.name)
@@ -312,6 +317,7 @@ export function serializeLeagueStandings(rows) {
     wins: row.wins,
     losses: row.losses,
     points: row.points,
+    goalDifference: row.goalDifference,
     form: row.form.slice(-5)
   }));
 }

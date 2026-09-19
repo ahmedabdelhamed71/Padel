@@ -1,6 +1,6 @@
 import { Trash2 } from "lucide-react";
 
-export default function StandingsTable({ rows, onDeletePlayer }) {
+export default function StandingsTable({ rows, onDeletePlayer, showGoalDifference = false }) {
   return (
     <div className="table-scroll">
       <table className="standings-table">
@@ -12,6 +12,7 @@ export default function StandingsTable({ rows, onDeletePlayer }) {
             <th>W</th>
             <th>L</th>
             <th>Form</th>
+            {showGoalDifference && <th>GD</th>}
             <th className="points-cell">Pts</th>
           </tr>
         </thead>
@@ -48,6 +49,11 @@ export default function StandingsTable({ rows, onDeletePlayer }) {
                   ))}
                 </div>
               </td>
+              {showGoalDifference && (
+                <td>
+                  <strong>{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</strong>
+                </td>
+              )}
               <td className="points-cell">
                 <strong>{row.points}</strong>
               </td>

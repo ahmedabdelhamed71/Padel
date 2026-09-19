@@ -34,8 +34,8 @@ test("clearing league matches keeps the current standings until Reset points is 
   );
 
   assert.deepEqual(
-    afterClear.map(({ id, played, wins, losses, points }) => ({ id, played, wins, losses, points })),
-    beforeClear.map(({ id, played, wins, losses, points }) => ({ id, played, wins, losses, points }))
+    afterClear.map(({ id, played, wins, losses, points, goalDifference }) => ({ id, played, wins, losses, points, goalDifference })),
+    beforeClear.map(({ id, played, wins, losses, points, goalDifference }) => ({ id, played, wins, losses, points, goalDifference }))
   );
 
   const afterReset = buildLeagueStandings(players, [], [], scoring, []);
@@ -55,16 +55,16 @@ test("carried league standings survive reloading and ignore corrupt entries", ()
     getItem: (key) => storageValues.get(key) ?? null,
     setItem: (key, value) => storageValues.set(key, value)
   };
-  const carry = [{ playerId: "p1", played: 100, wins: 70, losses: 30, points: 310, form: ["W", "L"] }];
+  const carry = [{ playerId: "p1", played: 100, wins: 70, losses: 30, points: 310, goalDifference: 42, form: ["W", "L"] }];
 
   assert.equal(saveStorage(LEAGUE_STANDINGS_KEY, carry, storage), true);
   assert.deepEqual(loadLeagueStandings(players, storage), carry);
 
   storageValues.set(LEAGUE_STANDINGS_KEY, JSON.stringify([
     ...carry,
-    { playerId: "p1", played: 1, wins: 1, losses: 0, points: 4, form: ["W"] },
-    { playerId: "missing", played: 1, wins: 1, losses: 0, points: 4, form: ["W"] },
-    { playerId: "p2", played: -1, wins: 0, losses: 0, points: 0, form: [] }
+    { playerId: "p1", played: 1, wins: 1, losses: 0, points: 4, goalDifference: 4, form: ["W"] },
+    { playerId: "missing", played: 1, wins: 1, losses: 0, points: 4, goalDifference: 4, form: ["W"] },
+    { playerId: "p2", played: -1, wins: 0, losses: 0, points: 0, goalDifference: 0, form: [] }
   ]));
   assert.deepEqual(loadLeagueStandings(players, storage), carry);
 });
@@ -98,7 +98,7 @@ test("deleting played league matches retains upcoming fixtures and current stand
 
   assert.deepEqual(remainingMatches.map((match) => match.id), ["upcoming"]);
   assert.deepEqual(
-    afterDelete.map(({ id, played, wins, losses, points }) => ({ id, played, wins, losses, points })),
-    currentRows.map(({ id, played, wins, losses, points }) => ({ id, played, wins, losses, points }))
+    afterDelete.map(({ id, played, wins, losses, points, goalDifference }) => ({ id, played, wins, losses, points, goalDifference })),
+    currentRows.map(({ id, played, wins, losses, points, goalDifference }) => ({ id, played, wins, losses, points, goalDifference }))
   );
 });

@@ -450,7 +450,7 @@ export default function League({
             <div>
               <span className="eyebrow">TABLE</span>
               <h2>Individual league standings</h2>
-              <p>Every player gets participation points, plus the win/loss points for the result.</p>
+              <p>Every player gets participation points, plus win/loss points. Ties on points are decided by score difference.</p>
             </div>
 
             <button
@@ -476,6 +476,7 @@ export default function League({
           <StandingsTable
             rows={rows}
             onDeletePlayer={deletePlayer}
+            showGoalDifference
           />
         </section>
       )}

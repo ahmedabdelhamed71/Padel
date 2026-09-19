@@ -111,11 +111,13 @@ export function loadLeagueStandings(players, storage) {
     const playerId = String(row.playerId);
     const validStats = [row.played, row.wins, row.losses, row.points]
       .every((value) => Number.isSafeInteger(value) && value >= 0);
+    const validGoalDifference =
+      row.goalDifference === undefined || Number.isSafeInteger(row.goalDifference);
 
-    if (!playerIds.has(playerId) || seen.has(playerId) || !validStats) return false;
+    if (!playerIds.has(playerId) || seen.has(playerId) || !validStats || !validGoalDifference) return false;
     if (!Array.isArray(row.form) || !row.form.every((result) => result === "W" || result === "L")) return false;
 
     seen.add(playerId);
     return true;
-  });
+  }).map((row) => ({ ...row, goalDifference: row.goalDifference ?? 0 }));
 }
